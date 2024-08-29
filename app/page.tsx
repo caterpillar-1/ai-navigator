@@ -8,11 +8,15 @@ import {
   Fab,
   IconButton,
   ListItem,
+  ListItemAvatar,
   Paper,
+  Skeleton,
   Stack,
   TextField,
+  ThemeProvider,
   Toolbar,
   Typography,
+  createTheme,
   styled,
   useMediaQuery,
   useScrollTrigger,
@@ -48,14 +52,17 @@ const Page = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [messages, setMessages] = useState(msgs);
+  const [messages, setMessages] =
+    useState<({ text: string; identity: MessageType } | undefined)[]>(msgs);
   const [inputValue, setInputValue] = useState<string>("");
 
   const handleSendMessage = () => {
     let text = "";
+    let newMessages = [...messages];
     scrollToBottom();
     if (inputValue.trim()) {
-      setMessages([...messages, { text: inputValue, identity: "User" }]);
+      newMessages.push({ text: inputValue, identity: "User" });
+      setMessages([...newMessages, undefined ]);
       text = inputValue;
       setInputValue("");
     }
@@ -64,19 +71,29 @@ const Page = () => {
       .then((res) => {
         console.log(`RECEIVED res: ${res}`);
         console.log(res);
-        
-        setMessages([...messages, { text: res.ans, identity: "AI"}]);
-      }).catch((err) => {
-        setMessages([...messages, { text: `\`\`\`txt\n${err}\n\`\`\``, identity: "AI"}]);
+        newMessages.push({
+          text: res.ans as string,
+          identity: "AI" as MessageType,
+        });
+
+        setMessages([...newMessages]);
+        scrollToBottom();
+      })
+      .catch((err) => {
+        newMessages.push({
+          text: `\`\`\`txt\n${err}\n\`\`\``,
+          identity: "AI" as MessageType,
+        });
+        setMessages([...newMessages]);
+        scrollToBottom();
       });
-    scrollToBottom();
   };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
   };
 
-  const handleKeyPress = (event: { key: string; ctrlKey: any; }) => {
+  const handleKeyPress = (event: { key: string; ctrlKey: any }) => {
     if (event.key === "Enter" && event.ctrlKey) {
       handleSendMessage();
     }
@@ -84,7 +101,10 @@ const Page = () => {
 
   const bottomOfMessages = useRef<HTMLDivElement>(null);
   const scrollToBottom = () => {
-    bottomOfMessages.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    bottomOfMessages.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
   };
 
   useEffect(() => {
@@ -110,66 +130,93 @@ const Page = () => {
           </Toolbar>
         </AppBar>
       </ElevationScroll>
-        <Toolbar variant="dense" />
+      <Toolbar variant="dense" />
 
-        <Container maxWidth="sm" disableGutters sx={{ background: "url('/mount.jpg')" }}>
-          <Paper square elevation={4}>
+      <Container
+        maxWidth="sm"
+        disableGutters
+        sx={{ background: "url('/mount.jpg')" }}
+      >
+        <Paper square elevation={4}>
           <Stack margin={1}>
-            {messages.map((msg, index) => (
-              <ListItem
-                key={index}
-                disableGutters
-                sx={{
-                  justifyContent:
-                    msg.identity === "User" ? "flex-end" : "flex-start",
-                }}
-              >
-                <Message text={msg.text} identity={msg.identity} />
-              </ListItem>
-            ))}
+            {messages.map((msg, index) =>
+              msg ? (
+                <ListItem
+                  key={index}
+                  disableGutters
+                  sx={{
+                    justifyContent:
+                      msg.identity === "User" ? "flex-end" : "flex-start",
+                  }}
+                >
+                  <Message text={msg.text} identity={msg.identity} />
+                </ListItem>
+              ) : (
+                <ListItem key={index}>
+                  <ListItemAvatar>
+                    <Skeleton variant="circular" width={40} height={40} />
+                  </ListItemAvatar>
+                  <Skeleton variant="rounded" width={512} height={80} />
+                </ListItem>
+              )
+            )}
+            <Box>
+              <Box height={150}></Box>
+              <Box ref={bottomOfMessages}></Box>
+            </Box>
           </Stack>
-          <Box ref={bottomOfMessages}>
-            <Toolbar />
-          </Box>
+          <ThemeProvider theme={sendBarTheme}>
           <AppBar
+            color="primary"
             position="fixed"
-            color="transparent"
             sx={{ top: "auto", bottom: 0 }}
           >
-        <Container maxWidth="sm" disableGutters>
-            <Box
-              component="form"
-              display="flex"
-              alignItems="center"
-              margin={1}
-              gap={1}
-            >
-              <TextField
-                variant="outlined"
-                fullWidth
-                multiline
-                maxRows={4}
-                value={inputValue}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyPress}
-                placeholder="请输入关于线性代数的问题……"
-              />
-              <Fab
-                color="secondary"
-                onClick={handleSendMessage}
-                size="large"
-                sx={{ flexShrink: 0 }}
+            <Container maxWidth="sm" disableGutters>
+              <Box
+                component="form"
+                display="flex"
+                alignItems="center"
+                margin={1}
+                gap={1}
               >
-                <SendIcon />
-              </Fab>
-            </Box>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  multiline
+                  maxRows={4}
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyPress}
+                  placeholder="请输入关于线性代数的问题……"
+                />
+                <Fab
+                  color="secondary"
+                  onClick={handleSendMessage}
+                  size="large"
+                  sx={{ flexShrink: 0 }}
+                >
+                  <SendIcon />
+                </Fab>
+              </Box>
             </Container>
           </AppBar>
-          </Paper>
-        </Container>
 
+          </ThemeProvider>
+        </Paper>
+      </Container>
     </>
   );
 };
+
+const sendBarTheme = createTheme({
+  palette: {
+    primary: {
+      main: "#e3f2fd",
+    },
+    secondary: {
+      main: "#3700B3",
+    }
+  }
+});
 
 export default Page;

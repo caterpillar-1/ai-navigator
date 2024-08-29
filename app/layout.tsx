@@ -1,6 +1,8 @@
 import React from "react";
 import type { Metadata } from "next";
-import { CssBaseline } from "@mui/material";import { makeStyles } from '@material-ui/core/styles';
+import { CssBaseline } from "@mui/material";
+import { makeStyles } from '@material-ui/core/styles';
+import { createTheme } from "@mui/material/styles";
 
 export const metadata: Metadata = {
   title: "AI Navigator",

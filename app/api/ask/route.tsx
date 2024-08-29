@@ -25,7 +25,7 @@ const reasoningServerAddr = "http://localhost:5000";
 export async function POST(req: NextRequest) {
   console.log(`Received request: ${req}`);
   
-  let ret = new Response(JSON.stringify({ ans: "Hello, this is AI speaking!" }), { status: 200 });
+  let ret = new Response(JSON.stringify({ ans: "### Hello, this is AI speaking!" }), { status: 200 });
 
   return ret;
 }

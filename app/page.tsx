@@ -80,21 +80,17 @@ const Page = () => {
     let newMessages = [...messages];
     if (inputValue.trim()) {
       newMessages.push({ text: inputValue, identity: "User" });
-      // setMessages([...newMessages, undefined ]);
+      setMessages([...newMessages, undefined ]);
       saveMessages([...newMessages]);
       text = inputValue;
       setInputValue("");
     }
     Utils.post(backendAddr + "/api/ask", { text: text })
       .then((res) => {
-        console.log(`RECEIVED res: ${res}`);
-        console.log(res);
         newMessages.push({
           text: res.ans as string,
           identity: "AI" as MessageType,
         });
-
-        // setMessages([...newMessages]);
         saveMessages([...newMessages]);
       })
       .catch((err) => {
@@ -102,7 +98,6 @@ const Page = () => {
           text: `\`\`\`txt\n${err}\n\`\`\``,
           identity: "AI" as MessageType,
         });
-        // setMessages([...newMessages]);
         saveMessages([...newMessages]);
       });
   };

@@ -3,29 +3,19 @@ import * as Utils from "@/utils/utils";
 
 const reasoningServerAddr = "http://localhost:5000";
 
-// export async function POST(req: NextRequest) {
-//   console.log(`Received request: ${req}`);
-//   
-//   let ret = undefined;
-//   await Utils.post(reasoningServerAddr + "/api/ask", {
-//     text: req.body,        
-//   }).then((res) => {
-//     ret = new NextResponse(res.body, {
-//       status: 200
-//     })
-//   }).catch((err) => {
-//     ret = new NextResponse("Reasoning Server Error", {
-//       status: 500
-//     })
-//   });
-// 
-//   return ret;
-// }
-
 export async function POST(req: NextRequest) {
-  console.log(`Received request: ${req}`);
-  
-  let ret = new Response(JSON.stringify({ ans: "### Hello, this is AI speaking!" }), { status: 200 });
+  let ret = undefined;
+  await Utils.post(reasoningServerAddr + "/api/query", {
+    text: (await req.json()).text,     
+  }).then((res) => {
+    ret = new NextResponse(JSON.stringify(res), {
+      status: 200
+    })
+  }).catch((err) => {
+    ret = new NextResponse("Reasoning Server Error", {
+      status: 500
+    })
+  });
 
   return ret;
 }

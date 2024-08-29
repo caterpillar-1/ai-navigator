@@ -20,8 +20,6 @@ function formatParams(params) {
 
 // convert a fetch result to a JSON object with error handling for fetch and json errors
 function convertToJSON(res) {
-  console.log("convertToJSON");
-  console.log(res);
   if (!res.ok) {
     throw `API request failed with response status ${res.status} and text: ${res.statusText}`;
   }
@@ -52,8 +50,6 @@ export function get(endpoint, params = {}) {
 // Helper code to make a post request. Default parameter of empty JSON Object for params.
 // Returns a Promise to a JSON Object.
 export function post(endpoint, params = {}) {
-  console.log(`POST ${endpoint}, ${params}`);
-  console.log(params)
   return fetch(endpoint, {
     method: "post",
     headers: { "Content-type": "application/json" },

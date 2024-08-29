@@ -88,7 +88,7 @@ const Page = () => {
     Utils.post(backendAddr + "/api/ask", { text: text })
       .then((res) => {
         newMessages.push({
-          text: (res.ans as string).replace("\\(", "$").replace("\\)", "$"),
+          text: (res.ans as string).replace("\\(", "$").replace("\\)", "$").replace("\\[", "\n$$\n").replace("\\]", "\n$$\n"),
           identity: "AI" as MessageType,
         });
         saveMessages([...newMessages]);

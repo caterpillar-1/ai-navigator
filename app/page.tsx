@@ -69,7 +69,7 @@ const Page = () => {
     setMessages(storage ? JSON.parse(storage) : []);
   }, [storage]);
 
-  const saveMessages = (newMessages: ({ text: string; identity: MessageType; } | undefined)[]) => {
+  const saveMessages = (newMessages: ({ text: string; identity: MessageType; } | null | undefined)[]) => {
     setStorage(JSON.stringify(newMessages));
     console.log("Save: ");
     console.log(JSON.stringify(newMessages));
@@ -88,7 +88,7 @@ const Page = () => {
     Utils.post(backendAddr + "/api/ask", { text: text })
       .then((res) => {
         newMessages.push({
-          text: res.ans as string,
+          text: (res.ans as string).replace("\\(", "$").replace("\\)", "$"),
           identity: "AI" as MessageType,
         });
         saveMessages([...newMessages]);

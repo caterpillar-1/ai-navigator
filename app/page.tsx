@@ -27,6 +27,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Message, { MessageType } from "@/components/Message";
 import * as Utils from "@/utils/utils.js";
 
+import { useLocalStorage } from "@reactuses/core";
+
 const backendAddr = "http://localhost:3000";
 
 const ElevationScroll = ({
@@ -52,21 +54,37 @@ const Page = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const [storage, setStorage] = useLocalStorage("messages", "[]");
+
   const [messages, setMessages] =
     useState<({ text: string; identity: MessageType } | undefined)[]>(msgs);
+
   const [inputValue, setInputValue] = useState<string>("");
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    setMessages(storage ? JSON.parse(storage) : []);
+  }, [storage]);
+
+  const saveMessages = (newMessages: ({ text: string; identity: MessageType; } | undefined)[]) => {
+    setStorage(JSON.stringify(newMessages));
+    console.log("Save: ");
+    console.log(JSON.stringify(newMessages));
+  }
 
   const handleSendMessage = () => {
     let text = "";
     let newMessages = [...messages];
-    scrollToBottom();
     if (inputValue.trim()) {
       newMessages.push({ text: inputValue, identity: "User" });
-      setMessages([...newMessages, undefined ]);
+      // setMessages([...newMessages, undefined ]);
+      saveMessages([...newMessages]);
       text = inputValue;
       setInputValue("");
     }
-    scrollToBottom();
     Utils.post(backendAddr + "/api/ask", { text: text })
       .then((res) => {
         console.log(`RECEIVED res: ${res}`);
@@ -76,16 +94,16 @@ const Page = () => {
           identity: "AI" as MessageType,
         });
 
-        setMessages([...newMessages]);
-        scrollToBottom();
+        // setMessages([...newMessages]);
+        saveMessages([...newMessages]);
       })
       .catch((err) => {
         newMessages.push({
           text: `\`\`\`txt\n${err}\n\`\`\``,
           identity: "AI" as MessageType,
         });
-        setMessages([...newMessages]);
-        scrollToBottom();
+        // setMessages([...newMessages]);
+        saveMessages([...newMessages]);
       });
   };
 
@@ -106,10 +124,6 @@ const Page = () => {
       block: "end",
     });
   };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, []);
 
   return (
     <>
